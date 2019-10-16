@@ -13,7 +13,7 @@ public class TrackPlayer : MonoBehaviour
     public Transform playerTransform;
     public uint recordInterval; // every N frames
     public bool shouldRecord = false; // called by other manager
-    [System.NonSerialized]public string FILE_NAME = "default.txt";
+    [System.NonSerialized]public string FILE_NAME = "default.txt"; //file name will be set by function call
     private int counter;
     public string Username{get;set;}
     public string Gender{get;set;}
