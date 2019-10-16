@@ -19,7 +19,7 @@ public class MazeManager : MonoBehaviour
     public int currentLevel;
     [Header("Random Level Loader")]
     private int levelcount = 22;
-    private int minCount = 2;
+    private int testPhaseStartingIndex = 2;
     private int nextLevel;
     private bool missionComplete = false;
     // private int maxCount = 5;
@@ -72,7 +72,7 @@ public class MazeManager : MonoBehaviour
     }
     //steps: choose level -> prepare level -> loadlevel
     public void ChooseLevel(){
-        GetRandomLevel(minCount);
+        GetRandomLevel(testPhaseStartingIndex);
         logManager.Reset();
     }
     public void UnloadLevel(){
@@ -166,6 +166,6 @@ public class MazeManager : MonoBehaviour
             candidates.Add(skipLevels[i] + 1);
             Debug.Log("skipped " + (skipLevels[i] + 1));
         }
-        Debug.Log("remaining " + (levelcount - minCount - candidates.Count));
+        Debug.Log("remaining " + (levelcount - testPhaseStartingIndex - candidates.Count));
     }
 }

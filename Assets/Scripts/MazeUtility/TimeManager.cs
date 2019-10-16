@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TimeManager : MonoBehaviour {
 	MazeManager mazeManager;
 	TrackPlayer logManager;
+    IntermissionManager intermissionManager;
 	public float timeLimit = 45.0f;
 	public Text timeDisplay;
 	[System.NonSerialized]public float timeCount;
@@ -17,6 +18,7 @@ public class TimeManager : MonoBehaviour {
 		timeCount = timeLimit;
 		mazeManager = MazeManager.instance;
 		logManager = TrackPlayer.instance;
+        intermissionManager = IntermissionManager.instance;
 	}
 	
 	// Update is called once per frame
@@ -36,16 +38,28 @@ public class TimeManager : MonoBehaviour {
 				Debug.Log("Trial successful");
 				Debug.Log("Time Remaining: " + timeCount);
 				logManager.WriteLevelFinishInfo(completed, timeLimit - timeCount);
-				if (mazeManager.currentLevel == 2){
+                if (mazeManager.currentLevel == 2)
+                {
+                    Reset();
+                    mazeManager.ChooseLevel();
+                    mazeManager.UnloadLevel();
+                    learningPhasePause = true;
+                    Debug.Log("pause");
+                }
+                else if (mazeManager.currentLevel < 2) {
+                    Reset();
+                    mazeManager.ChooseLevel();
+                    mazeManager.UnloadLevel();
+
+                    StartCoroutine(NextLevel(3.0f));
+                }
+                else { 
 					Reset();
 					mazeManager.ChooseLevel();
-					mazeManager.UnloadLevel();
-					learningPhasePause = true;
-					Debug.Log("pause");
-				} else {
-					Reset();
-					mazeManager.ChooseLevel();
-					StartCoroutine(NextLevel(3.0f));
+                    mazeManager.UnloadLevel();
+
+                    //StartCoroutine(NextLevel(3.0f));
+                    intermissionManager.ActivatePoints();
 				}
 			}
 		}
@@ -55,8 +69,11 @@ public class TimeManager : MonoBehaviour {
 			logManager.WriteLevelFinishInfo(completed, timeLimit);
 			Reset();
 			mazeManager.ChooseLevel();
-			mazeManager.PrepareLevel();
-		}
+			mazeManager.UnloadLevel();
+
+            //mazeManager.PrepareLevel();
+            intermissionManager.ActivatePoints();
+        }
 		
 	}
 	public void Reset(){
@@ -88,7 +105,7 @@ public class TimeManager : MonoBehaviour {
 
 	void OnGUI(){
 		if (learningPhasePause){
-			if (GUI.Button(new Rect(60, 60, 200, 60), "Click here to continue")){
+			if (GUI.Button(new Rect(60, 60, 250, 60), "Instruction time. Click here to continue")){
 				
 				StartCoroutine(NextLevel(3.0f));
 				learningPhasePause = false;
