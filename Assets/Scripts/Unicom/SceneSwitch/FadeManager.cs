@@ -42,7 +42,7 @@ public class FadeManager : MonoBehaviour
     }
     public void FadeIn()
     {
-        Debug.Log(fading);
+        //Debug.Log(fading);
         StartCoroutine(LinearFade(defaultColor, fadeColor, fadeInDuration));
     }
     public void FadeOut()
