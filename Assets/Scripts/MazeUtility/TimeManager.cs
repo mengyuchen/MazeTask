@@ -13,8 +13,13 @@ public class TimeManager : MonoBehaviour {
 	[System.NonSerialized]public bool completed = false;
 	[System.NonSerialized]public bool shouldCount = false;
 	bool learningPhasePause = false;
+    public static TimeManager instance;
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
 
-	void Start () {
+    void Start () {
 		timeCount = timeLimit;
 		mazeManager = MazeManager.instance;
 		logManager = TrackPlayer.instance;

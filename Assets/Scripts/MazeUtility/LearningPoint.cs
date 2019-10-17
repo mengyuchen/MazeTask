@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class LearningPoint : MonoBehaviour {
 	TrackPlayer logManager;
-	SimpleFade fadeManager;
+	FadeManager fadeManager;
 	MazeManager mazeManager;
     ArrowManager arrowManager;
 	[SerializeField] bool isLogging = false;
@@ -17,7 +17,7 @@ public class LearningPoint : MonoBehaviour {
 	//sets black screen to transparent
 	void Start () {
 		logManager = TrackPlayer.instance;
-		fadeManager = SimpleFade.Instance;
+		fadeManager = FadeManager.instance;
 		mazeManager = MazeManager.instance;
         arrowManager = ArrowManager.instance;
 		transform.position = presetPoints[pointIndex].transform.position;
@@ -25,13 +25,13 @@ public class LearningPoint : MonoBehaviour {
 
 	// Update is called once per frame
 	void OnTriggerEnter(Collider other){
-		fadeManager.fadingNeeded = true;
+		
 		if (other.tag == "Player"){
 			if (isLogging){
 				string message = "learning point at idx = " + pointIndex + " loop = " + loop;
 				logManager.WriteCustomInfo(message);
 			}
-			StartCoroutine(fadeManager.Unfade(0.5f));
+            fadeManager.QuickFade();
 			pointIndex ++;
 			if (pointIndex < presetPoints.Length){
 				NextPoint();

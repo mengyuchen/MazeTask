@@ -6,12 +6,12 @@ public class ArrowCollisionCheck : MonoBehaviour
 {
     MazeManager mazeManager;
     ArrowManager arrowManager;
-    SimpleFade fadeManager;
+    FadeManager fadeManager;
     [SerializeField] bool debug = false;
     void Start(){
         mazeManager = MazeManager.instance;
         arrowManager = ArrowManager.instance;
-        fadeManager = SimpleFade.Instance;
+        fadeManager = FadeManager.instance;
     }
     void Update(){
         // if (debug){
@@ -24,14 +24,14 @@ public class ArrowCollisionCheck : MonoBehaviour
             // Debug.Log("arrow collision detected");
             arrowManager.completed = true;
             transform.position = new Vector3(0, 100, 0);
-            fadeManager.fadingNeeded = true;
+            fadeManager.FadeIn();
             StartCoroutine(Trigger(2.0f));
         }
     }
     private IEnumerator Trigger(float waitTime)
     {
         yield return new WaitForSecondsRealtime(waitTime / 3.0f);
-        fadeManager.fadingNeeded = false;
+        fadeManager.FadeOut();
         yield return new WaitForSecondsRealtime(waitTime);
 		mazeManager.LoadLevel();
         arrowManager.Reset();

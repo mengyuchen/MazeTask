@@ -6,14 +6,17 @@ using UnityEngine.SceneManagement;
 public class LevelLauncher : MonoBehaviour
 {
     [SerializeField] KeyCode refreshKey = KeyCode.N; //in case something happened
-    // public int levelCount;
     int loadedLevelBuildIndex;
-    SimpleFade fadeManager;
-    // int currentLevel;
-    
+    FadeManager fadeManager;
+    public static LevelLauncher instance;
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+    }
+
     void Start()
     {
-        fadeManager = SimpleFade.Instance;
+        fadeManager = FadeManager.instance;
 
         //initial check if there is anything already accidentally loaded
         if (Application.isEditor) {
@@ -57,7 +60,7 @@ public class LevelLauncher : MonoBehaviour
 
     IEnumerator LoadLevel (int levelBuildIndex) {
 		enabled = false; // <-- this is the Unity Behavior enable bool
-        fadeManager.fadingNeeded = true;
+        fadeManager.FadeIn();
 
         //unload existing scene
 		if (loadedLevelBuildIndex > 0) {
@@ -71,18 +74,18 @@ public class LevelLauncher : MonoBehaviour
 		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(levelBuildIndex));
 		loadedLevelBuildIndex = levelBuildIndex;
 		enabled = true;
-        fadeManager.fadingNeeded = false;
+        fadeManager.FadeOut();
 	}
     IEnumerator UnloadLevel(){
         enabled = false; // <-- this is the Unity Behavior enable bool
-        fadeManager.fadingNeeded = true;
+        fadeManager.FadeIn();
         if (loadedLevelBuildIndex > 0) {
 			yield return SceneManager.UnloadSceneAsync(loadedLevelBuildIndex);
         }
         SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(0));
 		loadedLevelBuildIndex = 0;
 		enabled = true;
-        fadeManager.fadingNeeded = false;
+        fadeManager.FadeOut();
     }
 
 }

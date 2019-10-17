@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TriggerFade : MonoBehaviour {
-	SimpleFade simpleFade;
+	FadeManager fadeManager;
 	void Start(){
-		simpleFade = SimpleFade.Instance;
+		fadeManager = FadeManager.instance;
 	}
 	// Use this for initialization
 	private void OnTriggerEnter(Collider other) {
-		simpleFade.fadingNeeded = true;
+        fadeManager.FadeIn();
 	}
 	private void OnTriggerExit(Collider other) {
-		simpleFade.fadingNeeded = false;	
+        fadeManager.FadeOut();
 	}
 }

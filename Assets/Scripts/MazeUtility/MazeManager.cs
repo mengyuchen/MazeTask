@@ -13,7 +13,7 @@ public class MazeManager : MonoBehaviour
     [SerializeField] ArrowManager arrowManager;
     [SerializeField] TimeManager timeManager;
     [SerializeField] TrackPlayer logManager;
-    [SerializeField] SimpleFade fadeManager;
+    [SerializeField] FadeManager fadeManager;
     [Header("Level Mode")]
     public MazeMode currentMode;
     public int currentLevel;
@@ -25,6 +25,8 @@ public class MazeManager : MonoBehaviour
     // private int maxCount = 5;
     private HashSet<int> candidates = new HashSet<int>();
     System.Random random = new System.Random();
+    [Header("Visibility Constant")]
+    public float VisibilityDistance = 1.0f;
     void Awake()
     {
         if (instance == null){
@@ -37,7 +39,12 @@ public class MazeManager : MonoBehaviour
     }
     void Start(){
         // logManager = TrackPlayer.instance;
-        fadeManager = SimpleFade.Instance;
+        if (fadeManager == null) fadeManager = FadeManager.instance;
+        if (levelManager == null) levelManager = LevelLauncher.instance;
+        if (arrowManager == null) arrowManager = ArrowManager.instance;
+        if (timeManager == null) timeManager = TimeManager.instance;
+        if (logManager == null) logManager = TrackPlayer.instance;
+
         levelcount = arrowManager.startingPoints.Length;
     }
 
@@ -99,8 +106,6 @@ public class MazeManager : MonoBehaviour
         }
     }
     public void LoadLevel(){
-        fadeManager.fadingNeeded = true;
-        StartCoroutine(fadeManager.SceneSwitchReset(1.0f));
         levelManager.SelectLevel(currentLevel);
         timeManager.Run();
         logManager.WriteLevelInfo();

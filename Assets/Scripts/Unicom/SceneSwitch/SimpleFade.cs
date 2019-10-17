@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SimpleFade : MonoBehaviour {
-	public static SimpleFade Instance { set; get; }
+	public static SimpleFade instance { set; get; }
 	public bool fadingNeeded;
 	[SerializeField] Image fadeImage;
 	[SerializeField] float fadeInTime = 0.01f;
@@ -19,7 +19,7 @@ public class SimpleFade : MonoBehaviour {
     private bool fading = false;
 	 private void Awake()
     {
-        Instance = this;
+        instance = this;
         transition = 0.0f;
 		//Debug.Log(transition);
 		fadeImage.color = new Color(1,1,1,0);

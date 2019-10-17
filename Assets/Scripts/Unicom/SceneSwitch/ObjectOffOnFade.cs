@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class ObjectOffOnFade : MonoBehaviour {
 
-	SimpleFade simpleFade;
+	FadeManager fadeManager;
 	[SerializeField]GameObject[] triggerObjects;
 	void Start(){
-		simpleFade = SimpleFade.Instance;
+		fadeManager = FadeManager.instance;
 	}
 	void Update(){
-		if (simpleFade.fadingNeeded){
+		if (fadeManager.Fading){
 			for (int i = 0; i < triggerObjects.Length; i ++){
 				triggerObjects[i].SetActive(false);
 			}
