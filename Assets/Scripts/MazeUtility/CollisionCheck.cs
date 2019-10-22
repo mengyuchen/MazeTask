@@ -6,14 +6,15 @@ public class CollisionCheck : MonoBehaviour {
 	TrackPlayer logManager;
 	FadeManager fadeManager;
     TargetManager targetManager;
+    MazeManager mazeManager;
 	[SerializeField] bool isLogging = false;
     [SerializeField] string DetectName = "Wall";
-    List<GameObject> targets = new List<GameObject>();
 	//sets black screen to transparent
 	void Start () {
 		if (logManager == null) logManager = TrackPlayer.instance;
 		if (fadeManager == null) fadeManager = FadeManager.instance;
         if (targetManager == null) targetManager = TargetManager.instance;
+        if (mazeManager == null) mazeManager = MazeManager.instance;
     }
     private void Update()
     {
@@ -21,46 +22,42 @@ public class CollisionCheck : MonoBehaviour {
     }
     // Update is called once per frame
     void OnTriggerEnter(Collider other){
-        //TO DO: need more test
-		if (other.gameObject.tag == DetectName){
-            fadeManager.FadeIn();
-            GetTarget();
-            //Debug.Log("player hit " + other.gameObject.name);
-            
-            foreach(var t in targets)
+        if (mazeManager.currentLevel >= 3)
+        {
+            //TO DO: need more test
+            if (other.gameObject.tag == DetectName)
             {
-                t.SetActive(false);
-            }
+                fadeManager.FadeIn();
 
-			if (isLogging){
-				string message = "Event: Player hit with " + other.gameObject.name;
-				logManager.WriteCustomInfo(message);
-			}
-			
-		}
-	}
-	void OnTriggerStay(Collider other){
-	}
-	void OnTriggerExit(Collider other){        
-		if (other.gameObject.tag == DetectName){
-            fadeManager.StopAllCoroutines();
-            fadeManager.ResetFadingStatus();
-            fadeManager.FadeOut();
+                targetManager.AllTargetsActiveStatus(false);
 
-            if (isLogging){
-				logManager.WriteCustomInfo("Event with " + other.gameObject.name + " ends.");
-            }
-            //         Debug.Log("exit wall");
-            foreach (var t in targets)
-            {
-                t.SetActive(true);
+                if (isLogging)
+                {
+                    string message = "Event: Player hit with " + other.gameObject.name;
+                    logManager.WriteCustomInfo(message);
+                }
+
             }
         }
 	}
-    private void GetTarget()
-    {
-        targets = targetManager.targets;
-        //Debug.Log("collision get target" + targets.Count);
-    }
+	void OnTriggerStay(Collider other){
+	}
+	void OnTriggerExit(Collider other){
+        if (mazeManager.currentLevel >= 3)
+        {
+            if (other.gameObject.tag == DetectName)
+            {
+                fadeManager.StopAllCoroutines();
+                fadeManager.ResetFadingStatus();
+                fadeManager.FadeOut();
+
+                if (isLogging)
+                {
+                    logManager.WriteCustomInfo("Event with " + other.gameObject.name + " ends.");
+                }
+                targetManager.AllTargetsActiveStatus(true);
+            }
+        }
+	}
    
 }

@@ -11,7 +11,6 @@ public class Visibility : MonoBehaviour {
     MazeManager mazeManager;
     CameraMarker cameraMarker;
     TargetManager targetManager;
-    List<GameObject> targets = new List<GameObject>();
 	void Start () {
         if (cameraMarker == null) cameraMarker = CameraMarker.instance;
         if (mazeManager == null) mazeManager = MazeManager.instance;
@@ -32,12 +31,8 @@ public class Visibility : MonoBehaviour {
 	void Update () {
         
         if (!fogMode){
-            if (targets.Count == 0)
-            {
-                targets = targetManager.targets;
-                return;
-            }
-            if (mazeManager.currentLevel >= 3)
+            
+            if (mazeManager.currentLevel >= 3 && targetManager.TargetReady)
             {
                 TargetDistanceChecking();
             }		
@@ -53,22 +48,16 @@ public class Visibility : MonoBehaviour {
 	}
     private void TargetDistanceChecking()
     {
-        for (int i = 0; i < targets.Count; i++)
+        for (int i = 0; i < targetManager.targets.Count; i++)
         {
-            var dist = Vector3.Distance(cameraMarker.transform.position, targets[i].transform.position);
+            var dist = Vector3.Distance(cameraMarker.transform.position, targetManager.targets[i].transform.position);
             if (dist > visibilityDistance)
             {
-                if (targets[i].activeSelf)
-                {
-                    targets[i].SetActive(false);
-                }
+                targetManager.SetRendererDisplayStatus(i, false);
             }
             else
             {
-                if (!targets[i].activeSelf)
-                {
-                    targets[i].SetActive(true);
-                }
+                targetManager.SetRendererDisplayStatus(i, true);
             }
         }
     }

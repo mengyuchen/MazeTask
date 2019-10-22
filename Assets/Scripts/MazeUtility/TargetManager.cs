@@ -5,60 +5,161 @@ using UnityEngine;
 public class TargetManager : MonoBehaviour
 {
     public static TargetManager instance;
-    public List<GameObject> targets = new List<GameObject>();
+    [HideInInspector] public List<GameObject> targets = new List<GameObject>();
+    [HideInInspector] public bool TargetReady = false;
     [SerializeField] GameObject placeHolder;
-    [SerializeField] GameObject placeHolderContainer;
+    private bool DummyTargets = false;
     private List<GameObject> placeHolders = new List<GameObject>();
-
-    private MazeManager mazeManager;
-
+    private Renderer[] targetRenderers;
+    private Renderer[] placeHolderRenderers;
     private void Awake()
     {
         if (instance == null) instance = this;
     }
     void Start()
     {
-        mazeManager = MazeManager.instance;
+    }
+
+    private void Update()
+    {
+        //debug use only
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SwitchDummyMode();
+        }
     }
     public void Reset()
     {
         targets.Clear();
         placeHolders.Clear();
-        DestroyPlaceHolders();
         //Debug.Log(targets.Count + " Reset ");
+        TargetReady = false;
     }
-   
+
     public void TargetSearch()
     {
+        TargetReady = false;
+        //make sure everything is cleared
+        Debug.Log(targets.Count + " search reset ");
         targets.Clear();
         placeHolders.Clear();
-        DestroyPlaceHolders();
 
-        //Debug.Log(targets.Count + " search reset ");
-        var objs = GameObject.FindGameObjectsWithTag("Target");
-        foreach (var o in objs)
+        FindOriginalTargets();
+        Debug.Log("original targets: " + targets.Count);
+        Debug.Log("target renderers:" + targetRenderers.Length);
+
+          
+        InstantiateDummyTargets();
+        
+        Debug.Log("dummy targets: " + placeHolders.Count);
+        //set dummy renderers
+        placeHolderRenderers = new Renderer[placeHolders.Count];
+        for (int i = 0; i < placeHolders.Count; i++)
         {
-            targets.Add(o);
+            placeHolderRenderers[i] = placeHolders[i].GetComponent<Renderer>();
+            placeHolderRenderers[i].enabled = false;
         }
-        InstantiatePlaceHolder();
+        Debug.Log("dummy t renderers: " + placeHolderRenderers.Length);
+
+        AllRendererDisplayStatus(true);
+        TargetReady = true;
         //Debug.Log("Targetmanager got target" + targets.Count);
     }
-    private void InstantiatePlaceHolder()
+    public void AllRendererDisplayStatus(bool state)
     {
-        foreach (var o in targets)
+        if (!DummyTargets)
         {
-            var ph = Instantiate(placeHolder, o.transform.position, Quaternion.identity);
-            ph.SetActive(false);
-            ph.transform.name = o.transform.name + "Dummy";
-            ph.transform.parent = placeHolderContainer.transform;
-            placeHolders.Add(ph);
+            for (int i = 0; i < targetRenderers.Length; i++)
+            {
+                if (targetRenderers[i] != null)
+                {
+                    targetRenderers[i].enabled = state;
+                }
+            }
+        } else
+        {
+            for (int i = 0; i < placeHolderRenderers.Length; i++)
+            {
+                if (placeHolderRenderers[i] != null)
+                {
+                    placeHolderRenderers[i].enabled = state;
+                }
+            }
         }
+    }
+    public void AllTargetsActiveStatus(bool state)
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            if (targetRenderers[i] != null)
+            {
+                targets[i].SetActive(state);
+            }
+        }
+    }
+    public void SetRendererDisplayStatus(int index, bool state)
+    {
+        if (!DummyTargets)
+        {
+            if (index < targetRenderers.Length)
+            {
+                if (targetRenderers[index].enabled != state)
+                {
+                    targetRenderers[index].enabled = state;
+                }
+            }
+        } else
+        {
+            if (index < placeHolderRenderers.Length)
+            {
+                if (placeHolderRenderers[index].enabled != state)
+                {
+                    placeHolderRenderers[index].enabled = state;
+                }
+            }
+        }
+    }
+    public void SwitchDummyMode()
+    {
+        AllRendererDisplayStatus(false);
+        DummyTargets = !DummyTargets;
+        AllRendererDisplayStatus(true);
     }
     private void DestroyPlaceHolders()
     {
+        //TO DO : make sure it is gone
         foreach(var o in placeHolders)
         {
             Destroy(o);
         }
     }
+    private void FindOriginalTargets()
+    {
+        //find targets
+        var objs = GameObject.FindGameObjectsWithTag("Target");
+        foreach (var o in objs)
+        {
+            targets.Add(o);
+        }
+        //set renderers
+        targetRenderers = new Renderer[objs.Length];
+        for (int i = 0; i < objs.Length; i++)
+        {
+            targetRenderers[i] = targets[i].GetComponent<Renderer>();
+            targetRenderers[i].enabled = false;
+        }
+    }
+    private void InstantiateDummyTargets()
+    {
+        //create dummies
+        foreach (var o in targets)
+        {
+            var ph = Instantiate(placeHolder, o.transform.position, Quaternion.identity);
+            ph.transform.name = o.transform.name + "Dummy";
+            //ph.transform.parent = placeHolderContainer.transform;\
+            ph.transform.parent = o.transform;
+            placeHolders.Add(ph);
+        }
+    }
+
 }
