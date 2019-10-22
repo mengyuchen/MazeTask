@@ -14,6 +14,7 @@ public class MazeManager : MonoBehaviour
     [SerializeField] TimeManager timeManager;
     [SerializeField] TrackPlayer logManager;
     [SerializeField] FadeManager fadeManager;
+    [SerializeField] TargetManager targetManager;
     [Header("Level Mode")]
     public MazeMode currentMode;
     public int currentLevel;
@@ -44,6 +45,7 @@ public class MazeManager : MonoBehaviour
         if (arrowManager == null) arrowManager = ArrowManager.instance;
         if (timeManager == null) timeManager = TimeManager.instance;
         if (logManager == null) logManager = TrackPlayer.instance;
+        if (targetManager == null) targetManager = TargetManager.instance;
 
         levelcount = arrowManager.startingPoints.Length;
     }
@@ -76,6 +78,7 @@ public class MazeManager : MonoBehaviour
         timeManager.Reset();
         logManager.Reset();
         arrowManager.Reset();
+        
     }
     //steps: choose level -> prepare level -> loadlevel
     public void ChooseLevel(){
@@ -89,6 +92,7 @@ public class MazeManager : MonoBehaviour
         levelManager.LevelCheck(); //check level and unload existing level
         currentLevel = nextLevel; // 1 -> training scene
         arrowManager.Reset();
+        targetManager.Reset();
         if (missionComplete == false){
             if (currentLevel == 1){
                 Debug.Log("preparing tutorial level");
@@ -107,9 +111,18 @@ public class MazeManager : MonoBehaviour
     }
     public void LoadLevel(){
         levelManager.SelectLevel(currentLevel);
+        StartCoroutine(WaitInit());
+    }
+    IEnumerator WaitInit()
+    {
+        while (levelManager.loading)
+        {
+            yield return null;
+        }
         timeManager.Run();
         logManager.WriteLevelInfo();
         logManager.Run();
+        targetManager.TargetSearch();
     }
     public void CompleteMaze(){
         timeManager.completed = true;

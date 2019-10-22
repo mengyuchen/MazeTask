@@ -9,6 +9,7 @@ public class LevelLauncher : MonoBehaviour
     int loadedLevelBuildIndex;
     FadeManager fadeManager;
     public static LevelLauncher instance;
+    public bool loading = false;
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -60,6 +61,7 @@ public class LevelLauncher : MonoBehaviour
 
     IEnumerator LoadLevel (int levelBuildIndex) {
 		enabled = false; // <-- this is the Unity Behavior enable bool
+        loading = true;
         fadeManager.FadeIn();
 
         //unload existing scene
@@ -74,6 +76,7 @@ public class LevelLauncher : MonoBehaviour
 		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(levelBuildIndex));
 		loadedLevelBuildIndex = levelBuildIndex;
 		enabled = true;
+        loading = false;
         fadeManager.FadeOut();
 	}
     IEnumerator UnloadLevel(){

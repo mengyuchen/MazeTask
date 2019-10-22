@@ -5,14 +5,16 @@ using UnityEngine.UI;
 public class CollisionCheck : MonoBehaviour {
 	TrackPlayer logManager;
 	FadeManager fadeManager;
+    TargetManager targetManager;
 	[SerializeField] bool isLogging = false;
     [SerializeField] string DetectName = "Wall";
-    GameObject[] targets;
+    List<GameObject> targets = new List<GameObject>();
 	//sets black screen to transparent
 	void Start () {
-		logManager = TrackPlayer.instance;
-		fadeManager = FadeManager.instance;
-	}
+		if (logManager == null) logManager = TrackPlayer.instance;
+		if (fadeManager == null) fadeManager = FadeManager.instance;
+        if (targetManager == null) targetManager = TargetManager.instance;
+    }
     private void Update()
     {
         
@@ -22,9 +24,9 @@ public class CollisionCheck : MonoBehaviour {
         //TO DO: need more test
 		if (other.gameObject.tag == DetectName){
             fadeManager.FadeIn();
-            SearchTarget();
+            GetTarget();
             //Debug.Log("player hit " + other.gameObject.name);
-            Debug.Log(targets.Length);
+            
             foreach(var t in targets)
             {
                 t.SetActive(false);
@@ -47,28 +49,18 @@ public class CollisionCheck : MonoBehaviour {
 
             if (isLogging){
 				logManager.WriteCustomInfo("Event with " + other.gameObject.name + " ends.");
-			}
-
+            }
+            //         Debug.Log("exit wall");
             foreach (var t in targets)
             {
                 t.SetActive(true);
             }
         }
 	}
-    private void SearchTarget()
+    private void GetTarget()
     {
-        if (targets == null)
-        {
-            Debug.Log("finding from null");
-            targets = GameObject.FindGameObjectsWithTag("Target");
-        }
-        else
-        {
-            if (targets.Length == 0)
-            {
-                Debug.Log("finding");
-                targets = GameObject.FindGameObjectsWithTag("Target");
-            }
-        }
+        targets = targetManager.targets;
+        //Debug.Log("collision get target" + targets.Count);
     }
+    
 }
