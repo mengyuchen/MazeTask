@@ -7296,6 +7296,7 @@ GameObject:
   - component: {fileID: 506155657}
   - component: {fileID: 506155658}
   - component: {fileID: 506155659}
+  - component: {fileID: 506155661}
   m_Layer: 0
   m_Name: MazeLauncher | CAMERA SETUP
   m_TagString: Untagged
@@ -7321,7 +7322,8 @@ MonoBehaviour:
   timeManager: {fileID: 506155658}
   logManager: {fileID: 506155656}
   fadeManager: {fileID: 0}
-  targetManager: {fileID: 0}
+  targetManager: {fileID: 506155660}
+  spaceManager: {fileID: 0}
   currentMode: 0
   currentLevel: 0
   VisibilityDistance: 2
@@ -7439,10 +7441,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47140cb28d95d294598f328ddbd4a893, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TargetTag: Target
   targets: []
   TargetReady: 0
-  placeHolder: {fileID: 9218745275013870981, guid: da7120f7ac7586f4b8fc5fb25b63e7da,
+  targetPlaceHolder: {fileID: 9218745275013870981, guid: da7120f7ac7586f4b8fc5fb25b63e7da,
     type: 3}
+--- !u!114 &506155661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506155652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06959cd9f49167645adb4f24bb4fdac5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SpaceObjectTags:
+  - Wall
+  - Boundary
+  SpatialObjectReady: 0
 --- !u!1 &558147565
 GameObject:
   m_ObjectHideFlags: 0
@@ -19080,7 +19099,7 @@ GameObject:
   - component: {fileID: 1078954598}
   - component: {fileID: 1078954597}
   m_Layer: 0
-  m_Name: GroundPlane
+  m_Name: UniversalGroundPlane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

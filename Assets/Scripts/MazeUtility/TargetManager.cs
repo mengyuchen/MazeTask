@@ -5,9 +5,10 @@ using UnityEngine;
 public class TargetManager : MonoBehaviour
 {
     public static TargetManager instance;
+    [SerializeField] string TargetTag = "Target";
     [HideInInspector] public List<GameObject> targets = new List<GameObject>();
     [HideInInspector] public bool TargetReady = false;
-    [SerializeField] GameObject placeHolder;
+    [SerializeField] GameObject targetPlaceHolder;
     private bool DummyTargets = false;
     private List<GameObject> placeHolders = new List<GameObject>();
     private Renderer[] targetRenderers;
@@ -136,7 +137,7 @@ public class TargetManager : MonoBehaviour
     private void FindOriginalTargets()
     {
         //find targets
-        var objs = GameObject.FindGameObjectsWithTag("Target");
+        var objs = GameObject.FindGameObjectsWithTag(TargetTag);
         foreach (var o in objs)
         {
             targets.Add(o);
@@ -154,7 +155,7 @@ public class TargetManager : MonoBehaviour
         //create dummies
         foreach (var o in targets)
         {
-            var ph = Instantiate(placeHolder, o.transform.position, Quaternion.identity);
+            var ph = Instantiate(targetPlaceHolder, o.transform.position, Quaternion.identity);
             ph.transform.name = o.transform.name + "Dummy";
             //ph.transform.parent = placeHolderContainer.transform;\
             ph.transform.parent = o.transform;

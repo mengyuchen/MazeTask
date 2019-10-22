@@ -15,6 +15,7 @@ public class MazeManager : MonoBehaviour
     [SerializeField] TrackPlayer logManager;
     [SerializeField] FadeManager fadeManager;
     [SerializeField] TargetManager targetManager;
+    [SerializeField] SpaceManager spaceManager;
     [Header("Level Mode")]
     public MazeMode currentMode;
     public int currentLevel;
@@ -46,6 +47,7 @@ public class MazeManager : MonoBehaviour
         if (timeManager == null) timeManager = TimeManager.instance;
         if (logManager == null) logManager = TrackPlayer.instance;
         if (targetManager == null) targetManager = TargetManager.instance;
+        if (spaceManager == null) spaceManager = SpaceManager.instance;
 
         levelcount = arrowManager.startingPoints.Length;
     }
@@ -123,6 +125,7 @@ public class MazeManager : MonoBehaviour
         logManager.WriteLevelInfo();
         logManager.Run();
         targetManager.TargetSearch();
+        spaceManager.LoadSpatialObjects();
     }
     public void CompleteMaze(){
         timeManager.completed = true;
