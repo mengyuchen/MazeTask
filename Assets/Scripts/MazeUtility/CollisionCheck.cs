@@ -62,5 +62,5 @@ public class CollisionCheck : MonoBehaviour {
         targets = targetManager.targets;
         //Debug.Log("collision get target" + targets.Count);
     }
-    
+   
 }
