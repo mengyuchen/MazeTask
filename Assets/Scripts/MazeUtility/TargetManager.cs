@@ -41,18 +41,18 @@ public class TargetManager : MonoBehaviour
     {
         TargetReady = false;
         //make sure everything is cleared
-        Debug.Log(targets.Count + " search reset ");
+        //Debug.Log(targets.Count + " search reset ");
         targets.Clear();
         placeHolders.Clear();
 
         FindOriginalTargets();
-        Debug.Log("original targets: " + targets.Count);
-        Debug.Log("target renderers:" + targetRenderers.Length);
+        //Debug.Log("original targets: " + targets.Count);
+        //Debug.Log("target renderers:" + targetRenderers.Length);
 
           
         InstantiateDummyTargets();
         
-        Debug.Log("dummy targets: " + placeHolders.Count);
+        //Debug.Log("dummy targets: " + placeHolders.Count);
         //set dummy renderers
         placeHolderRenderers = new Renderer[placeHolders.Count];
         for (int i = 0; i < placeHolders.Count; i++)
@@ -60,7 +60,7 @@ public class TargetManager : MonoBehaviour
             placeHolderRenderers[i] = placeHolders[i].GetComponent<Renderer>();
             placeHolderRenderers[i].enabled = false;
         }
-        Debug.Log("dummy t renderers: " + placeHolderRenderers.Length);
+        //Debug.Log("dummy t renderers: " + placeHolderRenderers.Length);
 
         AllRendererDisplayStatus(true);
         TargetReady = true;
@@ -92,10 +92,7 @@ public class TargetManager : MonoBehaviour
     {
         for (int i = 0; i < targets.Count; i++)
         {
-            if (targetRenderers[i] != null)
-            {
-                targets[i].SetActive(state);
-            }
+            targets[i].SetActive(state);
         }
     }
     public void SetRendererDisplayStatus(int index, bool state)
@@ -104,18 +101,24 @@ public class TargetManager : MonoBehaviour
         {
             if (index < targetRenderers.Length)
             {
-                if (targetRenderers[index].enabled != state)
+                if (targetRenderers[index] != null)
                 {
-                    targetRenderers[index].enabled = state;
+                    if (targetRenderers[index].enabled != state)
+                    {
+                        targetRenderers[index].enabled = state;
+                    }
                 }
             }
         } else
         {
             if (index < placeHolderRenderers.Length)
             {
-                if (placeHolderRenderers[index].enabled != state)
+                if (placeHolderRenderers[index] != null)
                 {
-                    placeHolderRenderers[index].enabled = state;
+                    if (placeHolderRenderers[index].enabled != state)
+                    {
+                        placeHolderRenderers[index].enabled = state;
+                    }
                 }
             }
         }

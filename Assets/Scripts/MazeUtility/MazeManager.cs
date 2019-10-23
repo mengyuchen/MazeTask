@@ -95,6 +95,7 @@ public class MazeManager : MonoBehaviour
         currentLevel = nextLevel; // 1 -> training scene
         arrowManager.Reset();
         targetManager.Reset();
+        fadeManager.ResetFadeOut();
         if (missionComplete == false){
             if (currentLevel == 1){
                 Debug.Log("preparing tutorial level");

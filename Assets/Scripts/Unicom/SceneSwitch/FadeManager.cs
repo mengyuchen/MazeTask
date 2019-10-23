@@ -49,6 +49,10 @@ public class FadeManager : MonoBehaviour
     {
         StartCoroutine(LinearFade(fadeColor, defaultColor, fadeOutDuration));
     }
+    public void ResetFadeOut()
+    {
+        StartCoroutine(LinearFade(fadeColor, defaultColor, fadeOutDuration / 4));
+    }
     public void QuickFade()
     {
         StartCoroutine(CurveFade(defaultColor, fadeColor, fadeDuration / 2));

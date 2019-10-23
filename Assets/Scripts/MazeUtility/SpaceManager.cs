@@ -5,18 +5,25 @@ using UnityEngine;
 public class SpaceManager : MonoBehaviour
 {
     public static SpaceManager instance;
-    [SerializeField] string[] SpaceObjectTags = new string[2]{"Wall", "Boundary"};
-   
+    [SerializeField] string[] SpaceObjectTags = new string[3]{"Wall", "Boundary", "Floor"};
+    GameObject[] UniversalGroundPlane;
     [HideInInspector] public GameObject[][] SpatialObjects;
     [HideInInspector] public bool SpatialObjectReady = false;
     private Renderer[][] SpatialObjectRenderers;
+    private Renderer[] GroundPlaneRenderers;
     private void Awake()
     {
         if (instance == null) instance = this;
     }
     void Start()
     {
-        
+        UniversalGroundPlane = GameObject.FindGameObjectsWithTag("GroundPlane");
+        GroundPlaneRenderers = new Renderer[UniversalGroundPlane.Length];
+        for (int i = 0; i < GroundPlaneRenderers.Length; i++)
+        {
+            GroundPlaneRenderers[i] = UniversalGroundPlane[i].GetComponent<Renderer>();
+            GroundPlaneRenderers[i].enabled = false;
+        }
     }
     private void Update()
     {
@@ -24,10 +31,19 @@ public class SpaceManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.O))
         {
             AllRendererDisplayStatus(false);
+            SetGroundPlaneDisplayStatus(true);
         }
         if (Input.GetKeyDown(KeyCode.I))
         {
             AllRendererDisplayStatus(true);
+            SetGroundPlaneDisplayStatus(false);
+        }
+    }
+    public void SetGroundPlaneDisplayStatus(bool state)
+    {
+        for(int i = 0; i < GroundPlaneRenderers.Length; i++)
+        {
+            GroundPlaneRenderers[i].enabled = state;
         }
     }
     public void LoadSpatialObjects()
@@ -35,6 +51,7 @@ public class SpaceManager : MonoBehaviour
         FindSpatialObjects();
         SetSpatialObjectRenderers();
         SpatialObjectReady = true;
+        SetGroundPlaneDisplayStatus(false);
     }
     public void AllRendererDisplayStatus(bool state)
     {
@@ -42,7 +59,10 @@ public class SpaceManager : MonoBehaviour
         {
             for (int j = 0; j < SpatialObjects[i].Length; j++)
             {
-                SpatialObjectRenderers[i][j].enabled = state;
+                if (SpatialObjectRenderers[i][j] != null)
+                {
+                    SpatialObjectRenderers[i][j].enabled = state;
+                }
             }
         }
     }
@@ -72,6 +92,5 @@ public class SpaceManager : MonoBehaviour
                 SpatialObjectRenderers[i][j] = SpatialObjects[i][j].GetComponent<Renderer>();
             }
         }
-        
     }
 }

@@ -8,6 +8,7 @@ TagManager:
   - Wall
   - Boundary
   - Floor
+  - GroundPlane
   layers:
   - Default
   - TransparentFX
