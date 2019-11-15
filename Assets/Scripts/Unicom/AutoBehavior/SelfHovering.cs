@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//Author: Mengyu Chen, 2018
+//For questions: mengyuchenmat@gmail.com
 public class SelfHovering : MonoBehaviour {
 
 	[SerializeField]private Vector3 coefficient = new Vector3(0.0f, 0.0f, 0.0f);

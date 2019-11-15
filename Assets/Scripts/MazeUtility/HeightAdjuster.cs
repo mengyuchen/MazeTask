@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class HeightAdjuster : MonoBehaviour {
 
     public static HeightAdjuster instance;

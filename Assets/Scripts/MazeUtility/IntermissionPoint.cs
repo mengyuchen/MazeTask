@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class IntermissionPoint : MonoBehaviour {
     MazeManager mazeManager;
     IntermissionManager intermissionPointManager;

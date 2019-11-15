@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class WallCollisionCheck : MonoBehaviour {
 	TrackPlayer logManager;
 	FadeManager fadeManager;

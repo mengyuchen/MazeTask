@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
-
-namespace Unicom{
+//Author: Mengyu Chen, 2018
+//For questions: mengyuchenmat@gmail.com
+namespace Unicom
+{
 	public class Utility {
 
 		public static float MapValue (float value, float from1, float to1, float from2, float to2) {

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
-
+//Author: Mengyu Chen, 2018
+//For questions: mengyuchenmat@gmail.com
 namespace XRTK
 {
     public class ControllerStats : MonoBehaviour

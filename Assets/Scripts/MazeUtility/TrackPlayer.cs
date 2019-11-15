@@ -5,7 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Text;
 using System.IO;
-
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class TrackPlayer : MonoBehaviour
 {
     static public TrackPlayer instance;

@@ -4,6 +4,8 @@ using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class InteractionManager : MonoBehaviour
 {
     public static InteractionManager instance;

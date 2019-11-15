@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class ArrowManager : MonoBehaviour
 {
     //public properties

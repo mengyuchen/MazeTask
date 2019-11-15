@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+//Author: Mengyu Chen, 2018
+//For questions: mengyuchenmat@gmail.com
 public class Launcher : MonoBehaviour
 {
     //key control

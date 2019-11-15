@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+//Author: Mengyu Chen, 2018
+//For questions: mengyuchenmat@gmail.com
 public class SelfRotation : MonoBehaviour {
 
 	[SerializeField] private float rotationSpeed = 2.0f;

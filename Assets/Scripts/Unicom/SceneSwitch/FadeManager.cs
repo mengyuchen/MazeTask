@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class FadeManager : MonoBehaviour
 {
     public static FadeManager instance { set; get; }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public class IntermissionManager : MonoBehaviour {
 
     public static IntermissionManager instance;

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
-
+//Author: Mengyu Chen, 2019
+//For questions: mengyuchenmat@gmail.com
 public enum MazeMode : int{tutorial, learning, testing, full};
 public class MazeManager : MonoBehaviour
 {
@@ -107,7 +108,6 @@ public class MazeManager : MonoBehaviour
     }
     public void ControlledInit()
     {
-        // to do: run upon confirmation
         //start confirmation check
         logManager.Run();
         timeManager.Run();
