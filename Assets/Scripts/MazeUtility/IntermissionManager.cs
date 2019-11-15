@@ -5,10 +5,14 @@ using UnityEngine;
 public class IntermissionManager : MonoBehaviour {
 
     public static IntermissionManager instance;
-    public IntermissionPoint[] points;
+    [Header("Setups")]
+    [Tooltip("Set up the intermission point objects and they will be used during maze transition phase. Click to see the referenced objects")] 
+    public IntermissionPoint[] Points;
+    [HideInInspector] public bool Approval = false;
+
     MazeManager mazeManager;
     ArrowManager arrowManager;
-    [HideInInspector]public bool approval = false;
+    
 	void Awake () {
         if (instance == null) instance = this;
 	}
@@ -16,9 +20,14 @@ public class IntermissionManager : MonoBehaviour {
     {
         mazeManager = MazeManager.instance;
         arrowManager = ArrowManager.instance;
-        for(int i = 0; i < points.Length; i++)
+
+        if (Points == null)
         {
-            points[i].gameObject.SetActive(false);
+            Points = GameObject.FindObjectsOfType<IntermissionPoint>();
+        }
+        for(int i = 0; i < Points.Length; i++)
+        {
+            Points[i].gameObject.SetActive(false);
         }
     }
 	
@@ -30,17 +39,17 @@ public class IntermissionManager : MonoBehaviour {
     {
         float maxDist = 0;
         int maxID = 0;
-        for (int i = 0; i < points.Length; i++)
+        for (int i = 0; i < Points.Length; i++)
         {
-            var dist = Vector3.Distance(points[i].transform.position, arrowManager.startingPoints[mazeManager.currentLevel - 1].transform.position      );
+            var dist = Vector3.Distance(Points[i].transform.position, arrowManager.StartingPoints[mazeManager.CurrentLevel - 1].transform.position      );
             if (dist > maxDist)
             {
                 maxDist = dist;
                 maxID = i;
             }
         }
-        points[maxID].gameObject.SetActive(true);
-        points[maxID].SetInstructionText();
-        approval = true;
+        Points[maxID].gameObject.SetActive(true);
+        //Points[maxID].SetInstructionText();
+        Approval = true;
     }
 }

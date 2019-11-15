@@ -7,11 +7,20 @@ public class LearningPoint : MonoBehaviour {
 	TrackPlayer logManager;
 	FadeManager fadeManager;
 	MazeManager mazeManager;
-    ArrowManager arrowManager;
-	[SerializeField] bool isLogging = false;
-	[SerializeField] GameObject[] presetPoints;
-	[SerializeField] int loopTimes = 5;
-	private int pointIndex = 0;
+    [Header("Arrow Setup")]
+    [Tooltip("The arrow object that user will see")] 
+    [SerializeField] GameObject ArrowAvatar;
+    [Tooltip("The height of object")] [SerializeField] float ArrowHeight = 1.5f;
+    [Header("Learning Points Setup")]
+    [Tooltip("The waypoints of the learning route in consecutive order")] 
+    [SerializeField] GameObject[] presetPoints;
+    [Tooltip("How many times the user will need to complete the route")]
+    [SerializeField] int LoopTimes = 2;
+    [Header("Debug")]
+    [Tooltip("For debug purpose, if true, a message will be recorded in txt file upon user arrival at arrow")]
+    [SerializeField] bool isLogging = false;
+
+    private int pointIndex = 0;
 	private int loop = 0;
 	private bool learningComplete = false;
 	//sets black screen to transparent
@@ -19,9 +28,8 @@ public class LearningPoint : MonoBehaviour {
 		logManager = TrackPlayer.instance;
 		fadeManager = FadeManager.instance;
 		mazeManager = MazeManager.instance;
-        arrowManager = ArrowManager.instance;
-		transform.position = presetPoints[pointIndex].transform.position;
-	}
+		transform.position = new Vector3(presetPoints[pointIndex].transform.position.x, ArrowHeight, presetPoints[pointIndex].transform.position.z);
+    }
 
 	// Update is called once per frame
 	void OnTriggerEnter(Collider other){
@@ -37,32 +45,20 @@ public class LearningPoint : MonoBehaviour {
 				NextPoint();
 			} else {
 				loop ++;
-				if (loop < loopTimes){
+				if (loop < LoopTimes){
 					pointIndex = 0;
 					NextPoint();
 				} else {
 					if (!learningComplete){
-						mazeManager.CompleteMaze();
+						mazeManager.CompleteMaze(true, "Last Learning Point");
 						learningComplete = true; //make sure it doesn't trigger twice;
 					}
 				}
 			}
-			
-			
 		}
 	}
-	void OnTriggerStay(Collider other){
-	}
-	void OnTriggerLeave(Collider other){
-		// fadeManager.fadingNeeded = false;
-		// if (other.tag == "Player"){	
-		// 	if (isLogging){
-		// 		logManager.WriteCustomInfo("Event with learning point ended");
-		// 	}
-		// }
-	}
 	void NextPoint(){
-		transform.position = presetPoints[pointIndex].transform.position;
+		transform.position = new Vector3(presetPoints[pointIndex].transform.position.x, ArrowHeight, presetPoints[pointIndex].transform.position.z);
 		Debug.Log("Point Index = " + pointIndex + " loop No. " + (loop + 1));
 	}
 

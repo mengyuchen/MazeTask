@@ -6,20 +6,52 @@ using Valve.VR;
 using Valve.VR.InteractionSystem;
 
 public class UIManager : MonoBehaviour {
-	[SerializeField]TrackPlayer trackManager;
-	[SerializeField]private InputField nameInput;
+    HeightAdjuster heightAdjuster;
+    SpaceManager spaceManager;
+    TargetManager targetManager;
+    LevelLauncher levelLauncher;
+    TimeManager timeManager;
+    VisibilityManager visibilityManager;
+    MazeManager mazeManager;
+	TrackPlayer logManager;
+
+    [Header("Input Fields")]
+	[Tooltip("Input field for participant name")]
+    [SerializeField]private InputField nameInput;
+    [Tooltip("Input field for participant gender")] 
     [SerializeField]private InputField genderInput;
+    [Tooltip("Input field for participant id")]
     [SerializeField]private InputField idInput;
+    [Tooltip("Input field for test date")]
     [SerializeField]private InputField dateInput;
-	[SerializeField]private GameObject infoRect;
-	private bool resetting = false;
+    [Header("Launching UI Elements")]
+    [Tooltip("Setup the UI elements to be turned off after selecting maze mode")]
+    [SerializeField]private GameObject[] LaunchingUIElements;
+
+    [Header("Basic UI display params")]
+    [SerializeField] float ButtonSpacing = 8.0f;
+
+    //private properties
+    private bool spatialObjectSwitch = false;
+    private bool distanceModeSwitch = false;
+    private bool fogModeSwitch = false;
+    private bool dummyModeSwitch = false;
     Player player;
 	void Start () {
-		trackManager = GetComponent<TrackPlayer>();
-        if (player == null)
-        {
-            player = Player.instance;
-        }
+        if (logManager == null) logManager = TrackPlayer.instance;
+        if (player == null) player = Player.instance;
+        if (heightAdjuster == null) heightAdjuster = HeightAdjuster.instance;
+        if (spaceManager == null) spaceManager = SpaceManager.instance;
+        if (targetManager == null) targetManager = TargetManager.instance;
+        if (levelLauncher == null) levelLauncher = LevelLauncher.instance;
+        if (timeManager == null) timeManager = TimeManager.instance;
+        if (visibilityManager == null) visibilityManager = VisibilityManager.instance;
+        if (mazeManager == null) mazeManager = MazeManager.instance;
+
+        spatialObjectSwitch = spaceManager.SpatialObjectOff;
+        distanceModeSwitch = visibilityManager.DistanceMode;
+        fogModeSwitch = visibilityManager.FogMode;
+        dummyModeSwitch = targetManager.UseDummies;
 	}
 
 	void LateUpdate()
@@ -28,30 +60,84 @@ public class UIManager : MonoBehaviour {
 	}
 	
 	public void ConfirmFileName(){
-        trackManager.CreateFile(idInput.text, nameInput.text, dateInput.text, genderInput.text);
-		Debug.Log("information recorded at /" +  idInput.text + "_" + nameInput.text + "_" + dateInput.text + ".txt");
+        logManager.CreateFile(idInput.text, nameInput.text, dateInput.text, genderInput.text);
     }
 	public void DeactivateInfoRect(){
-		infoRect.SetActive(false);
+        foreach (var obj in LaunchingUIElements)
+        {
+            obj.SetActive(false);
+        }
 	}
 	public void ActivateInfoRect(){
-		infoRect.SetActive(true);
-	}
-    public void Calibrate()
-    { 
-	    //Vector3 referencePos = new Vector3(0, 1, 0);
-	    //Vector3 currentPos = player.hmdTransform.position;
-	    //Vector3 offsetPos = currentPos - referencePos;
-	    //player.trackingOriginTransform.position = -offsetPos;
-	    //Debug.Log(offsetPos + " offsetPos");
-	    //float rotZ = player.hmdTransform.rotation.eulerAngles.z;
-	    //float rotX = player.hmdTransform.rotation.eulerAngles.x;
-	    //Vector3 referenceRot = new Vector3(rotX, 0, rotZ);
-	    //Vector3 currentRot = player.hmdTransform.rotation.eulerAngles;
-	    //Vector3 offsetRot = currentRot - referenceRot;
-	    //Debug.Log(offsetRot + " offset rot");
-	    //player.trackingOriginTransform.rotation = Quaternion.Euler(-offsetRot);
-	    
+        foreach (var obj in LaunchingUIElements)
+        {
+            obj.SetActive(true);
+        }
+    }
+    public void OnGUI()
+    {
+        
+        if (timeManager.learningPhasePause)
+        {
+            GUILayout.BeginArea(new Rect(50, 40, 300, 500));
+            if (GUILayout.Button("Click Here to Proceed to Next Level"))
+            {
+                timeManager.ProceedLearningPause();
+            }
+            GUILayout.EndArea();
+            return;
+        }
+        
+        if (MazeManager.instance.CurrentLevel >= 1)
+        {
+            GUILayout.BeginArea(new Rect(50, 40, 300, 500));
+            if (GUILayout.Button("Headset Higher +" + heightAdjuster.YoffsetStep))
+            {
+                heightAdjuster.HeadsetUp();
+            }
+            GUILayout.Space(ButtonSpacing);
+            if (GUILayout.Button("Headset Lower -" + heightAdjuster.YoffsetStep))
+            {
+                heightAdjuster.HeadsetDown();
+            }
+            GUILayout.Space(ButtonSpacing);
+            if (GUILayout.Button("Turn ON / OFF Dummy Mode: " + dummyModeSwitch))
+            {
+                dummyModeSwitch = !dummyModeSwitch;
+                targetManager.SwitchDummyMode(dummyModeSwitch);
+            }
+            GUILayout.Space(ButtonSpacing);
+            if (GUILayout.Button("Turn ON / OFF Alter Space: "+ spatialObjectSwitch))
+            {
+                spatialObjectSwitch = !spatialObjectSwitch;
+                spaceManager.SwitchDisplayMode(!spatialObjectSwitch);
+            }
+            GUILayout.Space(ButtonSpacing);
+            if (GUILayout.Button("Distance Based Object Display ON / OFF: " + distanceModeSwitch))
+            {
+                distanceModeSwitch = !distanceModeSwitch;
+                visibilityManager.DistanceMode = distanceModeSwitch;
+                var visibility = FindObjectOfType<Visibility>();
+                if (visibility != null)
+                {
+                    visibility.SwitchDistanceMode(distanceModeSwitch);
+                }
+            }
+            GUILayout.Space(ButtonSpacing);
+            if (GUILayout.Button("Fog Mode ON / OFF: " + fogModeSwitch))
+            {
+                fogModeSwitch = !fogModeSwitch;
+                visibilityManager.FogMode = fogModeSwitch;
+                var visibility = FindObjectOfType<Visibility>();
+                if (visibility != null)
+                {
+                    visibility.SwitchFogMode(fogModeSwitch);
+                }
+            }
+            GUILayout.Space(ButtonSpacing);
+            GUILayout.EndArea();
+        }
+        
     }
 
 }

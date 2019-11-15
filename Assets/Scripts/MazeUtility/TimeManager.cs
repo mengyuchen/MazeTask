@@ -4,102 +4,146 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TimeManager : MonoBehaviour {
-	MazeManager mazeManager;
-	TrackPlayer logManager;
-    IntermissionManager intermissionManager;
-	public float timeLimit = 45.0f;
-	public Text timeDisplay;
-	[System.NonSerialized]public float timeCount;
-	[System.NonSerialized]public bool completed = false;
-	[System.NonSerialized]public bool shouldCount = false;
-	bool learningPhasePause = false;
     public static TimeManager instance;
+    
+    [Header("Timer Setup")]
+	[Tooltip("Unit: Seconds. Set up time limit for maze test. Not valid during tutorial and learning phase")]
+    public float TimeLimit = 45.0f;
+    [Header("Display Setup")]
+    [Tooltip("Whether or not to show time on monitor (not in VR headset, participant won't see it)")]
+    public bool DisplayTime = true;
+    [Tooltip("Reference text object")] public Text TimeText;
+	[System.NonSerialized]public bool learningPhasePause = false;
+
+    private float timeCount;
+    private bool completed = false;
+    private bool shouldCount = false;
+    private int successStatus = 0; //0 for unknown, 1 for success, 2 for fail;
+    private string objectName = "";
+    MazeManager mazeManager;
+    TrackPlayer logManager;
+    IntermissionManager intermissionManager;
+
     private void Awake()
     {
         if (instance == null) instance = this;
     }
-
     void Start () {
-		timeCount = timeLimit;
+		timeCount = TimeLimit;
 		mazeManager = MazeManager.instance;
 		logManager = TrackPlayer.instance;
         intermissionManager = IntermissionManager.instance;
 	}
-	
-	// Update is called once per frame
 	void Update () {
 		if (shouldCount){
 			CountDown();
 		}
 	}
 	private void CountDown(){
-		timeDisplay.text = "Current Level = " + (mazeManager.currentLevel - 2) + " | Time left: " + timeCount.ToString();
+		TimeText.text = "Current Level = " + (mazeManager.CurrentLevel - 2) + " | Time left: " + timeCount.ToString();
 		if(timeCount > 0)
 		{
 			timeCount -= Time.deltaTime;
 
 			if(completed)
 			{
-				Debug.Log("Trial successful");
-				Debug.Log("Time Remaining: " + timeCount);
-				logManager.WriteLevelFinishInfo(completed, timeLimit - timeCount);
-                if (mazeManager.currentLevel == 2)
+                if (successStatus == 1) {
+                    Debug.Log("Trial successful with correct object");
+                    Debug.Log("Time Remaining: " + timeCount);
+                    logManager.WriteLevelFinishInfo(completed, TimeLimit - timeCount, objectName);
+                } else if (successStatus == 2)
+                {
+                    Debug.Log("Trial unsuccessful with wrong object");
+                    Debug.Log("Time Remaining: " + timeCount);
+                    logManager.WriteLevelFinishInfo(!completed, TimeLimit - timeCount, objectName);
+                } else
+                {
+                    Debug.Log("Error. SuccessStatus unknown " + successStatus);
+                }
+
+                if (mazeManager.CurrentLevel == 2)
                 {
                     Reset();
                     mazeManager.ChooseLevel();
                     mazeManager.UnloadLevel();
                     learningPhasePause = true;
+                    WriteTimeDisplay("Click button above to officially start maze test.");
                     Debug.Log("pause");
                 }
-                else if (mazeManager.currentLevel < 2) {
+                else if (mazeManager.CurrentLevel < 2) {
                     Reset();
                     mazeManager.ChooseLevel();
                     mazeManager.UnloadLevel();
-
                     StartCoroutine(NextLevel(3.0f));
                 }
                 else { 
 					Reset();
 					mazeManager.ChooseLevel();
                     mazeManager.UnloadLevel();
-
-                    //StartCoroutine(NextLevel(3.0f));
                     intermissionManager.ActivatePoints();
 				}
 			}
 		}
 		else
 		{
-			Debug.Log("Trial unsuccessful");
-			logManager.WriteLevelFinishInfo(completed, timeLimit);
+			Debug.Log("Trial unsuccessful. Time Out");
+			logManager.WriteLevelFinishInfo(completed, TimeLimit, objectName);
 			Reset();
 			mazeManager.ChooseLevel();
 			mazeManager.UnloadLevel();
-
             //mazeManager.PrepareLevel();
             intermissionManager.ActivatePoints();
         }
-		
 	}
 	public void Reset(){
 		shouldCount = false;
 		completed = false;
-		timeCount = timeLimit;
+        successStatus = 0;
+		timeCount = TimeLimit;
+        objectName = "";
 		DeactivateDisplay();
 	}
 	public void Run(){
-		// timeCount = timeLimit;
+		// timeCount = TimeLimit;
 		shouldCount = true;
-		ActivateDisplay();
+        Debug.Log("Timer starts");
+        if (DisplayTime)
+        {
+            ActivateDisplay();
+        }
 	}
+    public void Complete(bool success, string name)
+    {
+        completed = true;
+        if (success)
+        {
+            successStatus = 1;
+        } else
+        {
+            successStatus = 2;
+        }
+        objectName = name;
+    }
+    public void SetTimeLimit(int limit)
+    {
+        timeCount = limit;
+    }
+    public void ProceedLearningPause()
+    {
+        StartCoroutine(NextLevel(3.0f));
+        learningPhasePause = false;
+        DeactivateDisplay();
+    }
 	public void WriteTimeDisplay(string message){
-		timeDisplay.text = message;
+		TimeText.text = message;
 	}
-	private void ActivateDisplay(){
-		timeDisplay.text = timeCount.ToString();
+
+    #region private methods
+    private void ActivateDisplay(){
+		TimeText.text = timeCount.ToString("N3");
 	}
 	private void DeactivateDisplay(){
-		timeDisplay.text = "";
+		TimeText.text = "";
 	}
 	private IEnumerator NextLevel(float waitTime)
     {
@@ -107,14 +151,5 @@ public class TimeManager : MonoBehaviour {
         yield return new WaitForSecondsRealtime(waitTime);
 		mazeManager.PrepareLevel();
     }
-
-	void OnGUI(){
-		if (learningPhasePause){
-			if (GUI.Button(new Rect(60, 60, 250, 60), "Instruction time. Click here to continue")){
-				
-				StartCoroutine(NextLevel(3.0f));
-				learningPhasePause = false;
-			}
-		}
-	}
+    #endregion private methods
 }

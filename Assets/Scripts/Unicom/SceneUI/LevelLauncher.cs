@@ -5,16 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class LevelLauncher : MonoBehaviour
 {
-    [SerializeField] KeyCode refreshKey = KeyCode.N; //in case something happened
     int loadedLevelBuildIndex;
     FadeManager fadeManager;
     public static LevelLauncher instance;
-    public bool loading = false;
+    [HideInInspector] public bool loading = false;
     private void Awake()
     {
         if (instance == null) instance = this;
     }
-
     void Start()
     {
         fadeManager = FadeManager.instance;
@@ -32,17 +30,16 @@ public class LevelLauncher : MonoBehaviour
 			}
         }
     }
-
-    // Update is called once per frame
-    void Update()
+    public void RefreshLevel()
     {
         //refresh and reload the current scene, in case any bug happens.
-        if (loadedLevelBuildIndex > 0){
-            if (Input.GetKeyDown(refreshKey)){ 
-                StartCoroutine(LoadLevel(loadedLevelBuildIndex));
-            } 
+        if (loadedLevelBuildIndex > 0)
+        {
+            //if (Input.GetKeyDown(refreshKey))
+            //{
+            //    StartCoroutine(LoadLevel(loadedLevelBuildIndex));
+            //}
         }
-
     }
 
     //"selectLevel(int)" function is to be called by MazeManager after checking the arrowmanager

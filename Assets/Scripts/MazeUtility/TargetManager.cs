@@ -5,11 +5,21 @@ using UnityEngine;
 public class TargetManager : MonoBehaviour
 {
     public static TargetManager instance;
+    [Header("Target Setup")]
+    [Tooltip("Set up the tag for target objects. Make sure the tag name here matches the tag used on Target objects. " +
+        "Target Manager will find the objects with defined tags")]
     [SerializeField] string TargetTag = "Target";
-    [HideInInspector] public List<GameObject> targets = new List<GameObject>();
+    
+    [Header("Place Holder Setup")]
+    [Tooltip("Switch object display mode between dummy objects or regular targets")]
+    public bool UseDummies = false;
+    [Tooltip("Set up the placeholder object. Drag and drop prefabs from assets")]
+    [SerializeField] GameObject TargetPlaceHolder;
+
+    [HideInInspector] public List<GameObject> Targets = new List<GameObject>();
     [HideInInspector] public bool TargetReady = false;
-    [SerializeField] GameObject targetPlaceHolder;
-    private bool DummyTargets = false;
+    
+
     private List<GameObject> placeHolders = new List<GameObject>();
     private Renderer[] targetRenderers;
     private Renderer[] placeHolderRenderers;
@@ -21,83 +31,65 @@ public class TargetManager : MonoBehaviour
     {
     }
 
-    private void Update()
-    {
-        //debug use only
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            SwitchDummyMode();
-        }
-    }
     public void Reset()
     {
-        targets.Clear();
+        Targets.Clear();
         placeHolders.Clear();
-        //Debug.Log(targets.Count + " Reset ");
+        //Debug.Log(Targets.Count + " Reset ");
         TargetReady = false;
     }
-
-    public void TargetSearch()
+    public void Init()
     {
-        TargetReady = false;
-        //make sure everything is cleared
-        //Debug.Log(targets.Count + " search reset ");
-        targets.Clear();
-        placeHolders.Clear();
-
-        FindOriginalTargets();
-        //Debug.Log("original targets: " + targets.Count);
-        //Debug.Log("target renderers:" + targetRenderers.Length);
-
-          
-        InstantiateDummyTargets();
-        
-        //Debug.Log("dummy targets: " + placeHolders.Count);
-        //set dummy renderers
-        placeHolderRenderers = new Renderer[placeHolders.Count];
-        for (int i = 0; i < placeHolders.Count; i++)
-        {
-            placeHolderRenderers[i] = placeHolders[i].GetComponent<Renderer>();
-            placeHolderRenderers[i].enabled = false;
-        }
-        //Debug.Log("dummy t renderers: " + placeHolderRenderers.Length);
-
-        AllRendererDisplayStatus(true);
+        TargetSearch();
+    }
+    public void Run()
+    {
+        SetTargetRendering(!UseDummies);
+        SetDummyRendering(UseDummies);
         TargetReady = true;
-        //Debug.Log("Targetmanager got target" + targets.Count);
+
+
+        //to do:: need to turn off objects based on their status
     }
-    public void AllRendererDisplayStatus(bool state)
+    public void SwitchDummyMode(bool state)
     {
-        if (!DummyTargets)
+        UseDummies = state;
+        SetDummyRendering(state);
+        SetTargetRendering(!state);
+        //SetRenderingStatus(false);
+        //UseDummies = state;
+        //SetRenderingStatus(true);
+    }
+
+    //call by visibility
+    public void SetRenderingStatus(bool state)
+    {
+        //if currentlevel == 2 (learning mode), it will ignore dummy target bool
+        if (!UseDummies || MazeManager.instance.CurrentLevel == 2)
         {
-            for (int i = 0; i < targetRenderers.Length; i++)
-            {
-                if (targetRenderers[i] != null)
-                {
-                    targetRenderers[i].enabled = state;
-                }
-            }
+            SetTargetRendering(state);
         } else
         {
-            for (int i = 0; i < placeHolderRenderers.Length; i++)
+            SetDummyRendering(state);
+        }
+        
+    }
+    //call by wallcollisioncheck script
+    public void SetTargetStatus(bool state)
+    {
+        if (TargetReady)
+        {
+            for (int i = 0; i < Targets.Count; i++)
             {
-                if (placeHolderRenderers[i] != null)
-                {
-                    placeHolderRenderers[i].enabled = state;
-                }
+                Targets[i].SetActive(state);
             }
         }
     }
-    public void AllTargetsActiveStatus(bool state)
+    //call by visibility distance check
+    public void SetRenderingStatus(int index, bool state)
     {
-        for (int i = 0; i < targets.Count; i++)
-        {
-            targets[i].SetActive(state);
-        }
-    }
-    public void SetRendererDisplayStatus(int index, bool state)
-    {
-        if (!DummyTargets)
+        //if currentlevel == 2 (learning mode), it will ignore dummy target bool
+        if (!UseDummies || MazeManager.instance.CurrentLevel == 2)
         {
             if (index < targetRenderers.Length)
             {
@@ -123,11 +115,51 @@ public class TargetManager : MonoBehaviour
             }
         }
     }
-    public void SwitchDummyMode()
+
+    private void TargetSearch()
     {
-        AllRendererDisplayStatus(false);
-        DummyTargets = !DummyTargets;
-        AllRendererDisplayStatus(true);
+        TargetReady = false;
+        //make sure everything is cleared
+        //Debug.Log(Targets.Count + " search reset ");
+        Targets.Clear();
+        placeHolders.Clear();
+
+        //find targets
+        FindTargetsAndRenderers();
+        //generate dummy targets at where targets are placed
+        InstantiateDummyTargets();
+        //set dummy renderers
+        FindDummyRenderers();
+
+        //Set Rendering status, by default show normal targets first
+        SetTargetRendering(true);
+        SetDummyRendering(false);
+    }
+    private void SetTargetRendering(bool state)
+    {
+        if (targetRenderers != null)
+        {
+            for (int i = 0; i < targetRenderers.Length; i++)
+            {
+                if (targetRenderers[i] != null)
+                {
+                    targetRenderers[i].enabled = state;
+                }
+            }
+        }
+    }
+    private void SetDummyRendering(bool state)
+    {
+        if (placeHolderRenderers != null)
+        {
+            for (int i = 0; i < placeHolderRenderers.Length; i++)
+            {
+                if (placeHolderRenderers[i] != null)
+                {
+                    placeHolderRenderers[i].enabled = state;
+                }
+            }
+        }
     }
     private void DestroyPlaceHolders()
     {
@@ -137,32 +169,41 @@ public class TargetManager : MonoBehaviour
             Destroy(o);
         }
     }
-    private void FindOriginalTargets()
+    private void FindTargetsAndRenderers()
     {
-        //find targets
+        //find Targets
         var objs = GameObject.FindGameObjectsWithTag(TargetTag);
         foreach (var o in objs)
         {
-            targets.Add(o);
+            Targets.Add(o);
         }
         //set renderers
         targetRenderers = new Renderer[objs.Length];
         for (int i = 0; i < objs.Length; i++)
         {
-            targetRenderers[i] = targets[i].GetComponent<Renderer>();
-            targetRenderers[i].enabled = false;
+            targetRenderers[i] = Targets[i].GetComponent<Renderer>();
+            //targetRenderers[i].enabled = true;
         }
     }
     private void InstantiateDummyTargets()
     {
         //create dummies
-        foreach (var o in targets)
+        foreach (var o in Targets)
         {
-            var ph = Instantiate(targetPlaceHolder, o.transform.position, Quaternion.identity);
+            var ph = Instantiate(TargetPlaceHolder, o.transform.position, Quaternion.identity);
             ph.transform.name = o.transform.name + "Dummy";
             //ph.transform.parent = placeHolderContainer.transform;\
             ph.transform.parent = o.transform;
             placeHolders.Add(ph);
+        }
+    }
+    private void FindDummyRenderers()
+    {
+        placeHolderRenderers = new Renderer[placeHolders.Count];
+        for (int i = 0; i < placeHolders.Count; i++)
+        {
+            placeHolderRenderers[i] = placeHolders[i].GetComponent<Renderer>();
+            //placeHolderRenderers[i].enabled = false;
         }
     }
 

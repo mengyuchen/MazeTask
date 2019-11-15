@@ -16,9 +16,12 @@ public class MazeManager : MonoBehaviour
     [SerializeField] FadeManager fadeManager;
     [SerializeField] TargetManager targetManager;
     [SerializeField] SpaceManager spaceManager;
-    [Header("Level Mode")]
-    public MazeMode currentMode;
-    public int currentLevel;
+
+    [Header("Level Params")]
+    [HideInInspector]public MazeMode CurrentMode;
+    [HideInInspector]public int CurrentLevel;
+    [HideInInspector] public bool LevelStartConfirmed = false;
+
     [Header("Random Level Loader")]
     private int levelcount = 22;
     private int testPhaseStartingIndex = 2;
@@ -27,8 +30,9 @@ public class MazeManager : MonoBehaviour
     // private int maxCount = 5;
     private HashSet<int> candidates = new HashSet<int>();
     System.Random random = new System.Random();
-    [Header("Visibility Constant")]
-    public float VisibilityDistance = 1.0f;
+
+    // [Header("Space Visibility")]
+    // public bool SpatialObjectOff = true;
     void Awake()
     {
         if (instance == null){
@@ -37,10 +41,9 @@ public class MazeManager : MonoBehaviour
             Destroy(gameObject);
         }
         DontDestroyOnLoad(gameObject);
-
     }
     void Start(){
-        // logManager = TrackPlayer.instance;
+        //find all other manager instances
         if (fadeManager == null) fadeManager = FadeManager.instance;
         if (levelManager == null) levelManager = LevelLauncher.instance;
         if (arrowManager == null) arrowManager = ArrowManager.instance;
@@ -49,122 +52,137 @@ public class MazeManager : MonoBehaviour
         if (targetManager == null) targetManager = TargetManager.instance;
         if (spaceManager == null) spaceManager = SpaceManager.instance;
 
-        levelcount = arrowManager.startingPoints.Length;
+        //the total level count depends on how many starting points
+        levelcount = arrowManager.StartingPoints.Length;
     }
 
     // Update is called once per frame
     void Update()
     {       
-        // //keyboard number based maze selection.
-        // for (int i = 1; i <= levelManager.levelCount; i++) {
-		// 	if (Input.GetKeyDown(KeyCode.Alpha0 + i)) { // maze selection by keyboard number shortcut
-        //         levelManager.LevelCheck(); //check level and unload existing level
-        //         currentLevel = i; // 
-        //         Debug.Log(currentLevel - 1);
-        //         arrowManager.Reset();
-        //         arrowManager.activateArrow(currentLevel - 1);
-		// 		return;
-		// 	}
-		// }
 
-        // avoid selecting the same number that has been chosen.
-        // if (Input.GetKeyDown(KeyCode.R)){ //press R to random generate a number, or whatever condition we define later
-        //     currentLevel = Random.Range(0, levelManager.levelCount); // <- random number should write value into "currentLevel"
-        //     Debug.Log(currentLevel);
-        //     arrowManager.Reset();
-        //     arrowManager.activateArrow(currentLevel - 1);
-        // }
     }
     public void ResetManagers(){
         levelManager.LevelCheck();
         timeManager.Reset();
         logManager.Reset();
         arrowManager.Reset();
-        
     }
-    //steps: choose level -> prepare level -> loadlevel
+    //steps of proceeding to next level: choose level -> prepare level -> loadlevel
     public void ChooseLevel(){
         GetRandomLevel(testPhaseStartingIndex);
         logManager.Reset();
     }
-    public void UnloadLevel(){
-        levelManager.LevelCheck();
-    }
+
     public void PrepareLevel(){
         levelManager.LevelCheck(); //check level and unload existing level
-        currentLevel = nextLevel; // 1 -> training scene
+        CurrentLevel = nextLevel; // 1 -> training scene
+        LevelStartConfirmed = false; //prepared but not confirmed, need user active confirmation later
         arrowManager.Reset();
         targetManager.Reset();
         fadeManager.ResetFadeOut();
         if (missionComplete == false){
-            if (currentLevel == 1){
-                Debug.Log("preparing tutorial level");
-            } else if (currentLevel == 2){
-                Debug.Log("preparing learning level");
+            if (CurrentLevel == 1){
+                Debug.Log("Preparing tutorial level");
+            } else if (CurrentLevel == 2){
+                Debug.Log("Preparing learning level");
             } else {
-                Debug.Log("preparing testing level:" + (currentLevel - 2));
+                Debug.Log("Preparing testing level:" + (CurrentLevel - 2));
             }
-            arrowManager.Activate(currentLevel - 1);
+            arrowManager.Activate(CurrentLevel - 1);
         } else {
             timeManager.WriteTimeDisplay("Mission Complete");
             arrowManager.SetTextContent("Mission Complete. Thank you!");
-            arrowManager.instructionText.transform.position = new Vector3(0,0.5f,0);
-            arrowManager.instructionText.SetActive(true);
+            arrowManager.InstructionText.transform.position = new Vector3(0,0.5f,0);
+            arrowManager.InstructionText.SetActive(true);
         }
     }
     public void LoadLevel(){
-        levelManager.SelectLevel(currentLevel);
+        levelManager.SelectLevel(CurrentLevel);
         StartCoroutine(WaitInit());
     }
-    IEnumerator WaitInit()
+    //separate call to unload level, instead of PrepareLevel()
+    public void UnloadLevel()
+    {
+        levelManager.LevelCheck();
+    }
+    public void ControlledInit()
+    {
+        // to do: run upon confirmation
+        //start confirmation check
+        logManager.Run();
+        timeManager.Run();
+        spaceManager.Run();
+        targetManager.Run();
+        LevelStartConfirmed = true; // level official start upon user confirmation
+    }
+    private IEnumerator WaitInit()
     {
         while (levelManager.loading)
         {
             yield return null;
         }
-        timeManager.Run();
         logManager.WriteLevelInfo();
-        logManager.Run();
-        targetManager.TargetSearch();
-        spaceManager.LoadSpatialObjects();
+        
+        targetManager.Init();
+        spaceManager.Init();
+
+        if (CurrentLevel <= 2)
+        {
+            //if in tutorial and learning phase, no need for starting confirmation
+            ControlledInit();
+        }
     }
-    public void CompleteMaze(){
-        timeManager.completed = true;
+
+    //call made by arrival collision check object, once target is reached, CompleteMaze() is called
+    public void CompleteMaze(bool success, string name){
+        timeManager.Complete(success, name);
     }
+    //called in main UI, which will change the parameters of maze mode
     public void MazeModeSelect(int mode){
-        currentMode = (MazeMode)mode;
-        Debug.Log("Selected Current Mode = " + currentMode);
+        CurrentMode = (MazeMode)mode;
+        Debug.Log("Selected Current Mode = " + CurrentMode);
 
         //if tutorial
-        if (currentMode == MazeMode.tutorial || currentMode == MazeMode.full){
+        if (CurrentMode == MazeMode.tutorial || CurrentMode == MazeMode.full){
             nextLevel = 1; // be default learning level = 1
-            timeManager.timeCount = int.MaxValue; // for learning purpose, timeCount goes infinite.
+            timeManager.SetTimeLimit(int.MaxValue); // for learning purpose, timeCount goes infinite.
             PrepareLevel();
         }
         //if learning
-        if (currentMode == MazeMode.learning){
+        if (CurrentMode == MazeMode.learning){
             nextLevel = 2;
-            timeManager.timeCount = int.MaxValue; // for learning purpose, timeCount goes infinite.
+            timeManager.SetTimeLimit(int.MaxValue); // for learning purpose, timeCount goes infinite.
             PrepareLevel();
         }
         //if training
-        if (currentMode == MazeMode.testing){
+        if (CurrentMode == MazeMode.testing){
             ChooseLevel();
             PrepareLevel(); //to do: randomize prepare level
         }
     }
+    //a string can be provided to skip certain levels, use comma to separate
+    public void SkipLevels(string levels)
+    {
+        int[] skipLevels = Array.ConvertAll(levels.Split(','), int.Parse);
+        for (int i = 0; i < skipLevels.Length; i++)
+        {
+            candidates.Add(skipLevels[i] + 1);
+            Debug.Log("Level Skipped " + (skipLevels[i] + 1));
+        }
+        Debug.Log("Remaining " + (levelcount - testPhaseStartingIndex - candidates.Count));
+    }
     private void GetRandomLevel(int min){
         //check if it's done
-        if (candidates.Count == levelcount - min || currentMode == MazeMode.learning || currentMode == MazeMode.tutorial){
+        if (candidates.Count == levelcount - min || CurrentMode == MazeMode.learning || CurrentMode == MazeMode.tutorial){
             missionComplete = true;
             ResetManagers(); // finishes
             Debug.Log("Mission Complete");
             return;
         }
         //check if its moving to learning phase
-        if (currentMode == MazeMode.full && currentLevel == 1){
+        if (CurrentMode == MazeMode.full && CurrentLevel == 1){
             nextLevel = 2;
-            timeManager.timeCount = int.MaxValue;
+            timeManager.SetTimeLimit(int.MaxValue);
             Debug.Log("Tutorial done. Move to next Learning phase");
             return;
         }
@@ -174,20 +192,10 @@ public class MazeManager : MonoBehaviour
             if (candidates.Add(randNum))
             {
                 nextLevel = randNum + 1;
-                Debug.Log("level: " + (nextLevel - 2) + " picked");
+                Debug.Log("Level " + (nextLevel - 2) + " selected.");
                 break;
             }
         }
     }
 
-    public void SkipLevels(string levels)
-    {
-        int[] skipLevels = Array.ConvertAll(levels.Split(','), int.Parse);
-        for (int i = 0; i < skipLevels.Length; i++)
-        {
-            candidates.Add(skipLevels[i] + 1);
-            Debug.Log("skipped " + (skipLevels[i] + 1));
-        }
-        Debug.Log("remaining " + (levelcount - testPhaseStartingIndex - candidates.Count));
-    }
 }

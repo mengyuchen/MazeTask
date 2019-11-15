@@ -9,6 +9,8 @@ TagManager:
   - Boundary
   - Floor
   - GroundPlane
+  - WarningBoundary
+  - Controller
   layers:
   - Default
   - TransparentFX

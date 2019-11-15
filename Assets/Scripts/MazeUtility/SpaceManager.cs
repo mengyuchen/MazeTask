@@ -5,92 +5,123 @@ using UnityEngine;
 public class SpaceManager : MonoBehaviour
 {
     public static SpaceManager instance;
-    [SerializeField] string[] SpaceObjectTags = new string[3]{"Wall", "Boundary", "Floor"};
-    GameObject[] UniversalGroundPlane;
-    [HideInInspector] public GameObject[][] SpatialObjects;
-    [HideInInspector] public bool SpatialObjectReady = false;
-    private Renderer[][] SpatialObjectRenderers;
-    private Renderer[] GroundPlaneRenderers;
+    [Header("Mode Switch")]
+    [Tooltip("Switch between different spatial object environments")] public bool SpatialObjectOff = false;
+    [Header("Space Object Setup")]
+    [Tooltip("Set up group A object tags. Space manager will find objects of these tags and be able to control their renderers")] 
+    [SerializeField] string[] GroupAObjectTags = new string[3] { "Wall", "Floor", "Boundary" };
+    [Tooltip("Set up group B object tags. Space manager will find objects of these tags and be able to control their renderers")] 
+    [SerializeField] string[] GroupBObjectTags = new string[1] { "GroundPlane" };
+    [Header("Special Feature")]
+    public bool WallColliderOff = true;
+    [HideInInspector] public GameObject[][] GroupAObjects;
+    [HideInInspector] public GameObject[][] GroupBObjects;
+    [HideInInspector] public bool GroupAObjectReady = false;
+    [HideInInspector] public bool GroupBObjectReady = false;
+
+    FadeManager fadeManager;
+    
+    private Renderer[][] GroupARenderers;
+    private Renderer[][] GroupBRenderers;
+    private Collider[] colliders; //temporary containers
     private void Awake()
     {
         if (instance == null) instance = this;
     }
     void Start()
     {
-        UniversalGroundPlane = GameObject.FindGameObjectsWithTag("GroundPlane");
-        GroundPlaneRenderers = new Renderer[UniversalGroundPlane.Length];
-        for (int i = 0; i < GroundPlaneRenderers.Length; i++)
+        if (fadeManager == null) fadeManager = FadeManager.instance;
+    }
+    public void SwitchDisplayMode(bool state)
+    {
+        SpatialObjectOff = !state;
+        SetRendererStatus(GroupARenderers, state);
+        SetRendererStatus(GroupBRenderers, !state);
+        if (WallColliderOff)
         {
-            GroundPlaneRenderers[i] = UniversalGroundPlane[i].GetComponent<Renderer>();
-            GroundPlaneRenderers[i].enabled = false;
+            SetColliderStatus(GroupAObjects, 0, state);
+        }
+        fadeManager.ResetFadeOut();
+    }
+    public void Init()
+    {
+        //find and init gourp A objs and renderers
+        GroupAObjects = FindObjectsWithTags(GroupAObjectTags);
+        GroupARenderers = InitRenderers(GroupAObjects);
+        GroupAObjectReady = true;
+
+        //do same with group B
+        GroupBObjects = FindObjectsWithTags(GroupBObjectTags);
+        GroupBRenderers = InitRenderers(GroupBObjects);
+        GroupBObjectReady = true;
+        //turn off group b renderers
+        SetRendererStatus(GroupBRenderers, false);
+    }
+    public void Run()
+    {
+        if (SpatialObjectOff && MazeManager.instance.CurrentLevel > 2)
+        {
+            SwitchDisplayMode(false);
         }
     }
-    private void Update()
+    #region private methods
+    private void SetRendererStatus(Renderer[][] renderers, bool state)
     {
-        //debug purpose only
-        if (Input.GetKeyDown(KeyCode.O))
+        if (renderers != null)
         {
-            AllRendererDisplayStatus(false);
-            SetGroundPlaneDisplayStatus(true);
-        }
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            AllRendererDisplayStatus(true);
-            SetGroundPlaneDisplayStatus(false);
-        }
-    }
-    public void SetGroundPlaneDisplayStatus(bool state)
-    {
-        for(int i = 0; i < GroundPlaneRenderers.Length; i++)
-        {
-            GroundPlaneRenderers[i].enabled = state;
-        }
-    }
-    public void LoadSpatialObjects()
-    {
-        FindSpatialObjects();
-        SetSpatialObjectRenderers();
-        SpatialObjectReady = true;
-        SetGroundPlaneDisplayStatus(false);
-    }
-    public void AllRendererDisplayStatus(bool state)
-    {
-        for (int i = 0; i < SpaceObjectTags.Length; i++)
-        {
-            for (int j = 0; j < SpatialObjects[i].Length; j++)
+            for (int i = 0; i < renderers.Length; i++)
             {
-                if (SpatialObjectRenderers[i][j] != null)
+                for (int j = 0; j < renderers[i].Length; j++)
                 {
-                    SpatialObjectRenderers[i][j].enabled = state;
+                    if (renderers[i][j] != null)
+                    {
+                        renderers[i][j].enabled = state;
+                    }
                 }
             }
         }
     }
-    private void FindSpatialObjects()
+    private GameObject[][] FindObjectsWithTags(string[] tags)
     {
         //find targets
-        SpatialObjects = new GameObject[SpaceObjectTags.Length][];
-        for (int i = 0; i < SpaceObjectTags.Length; i++)
+        GameObject[][] objects = new GameObject[tags.Length][];
+        for (int i = 0; i < tags.Length; i++)
         {
-            var objs = GameObject.FindGameObjectsWithTag(SpaceObjectTags[i]);
-            SpatialObjects[i] = new GameObject[objs.Length];
-            for (int j = 0; j < objs.Length; j ++)
+            var objs = GameObject.FindGameObjectsWithTag(tags[i]);
+            objects[i] = new GameObject[objs.Length];
+            for (int j = 0; j < objs.Length; j++)
             {
-                SpatialObjects[i][j] = objs[j];
+                objects[i][j] = objs[j];
             }
-            
         }
+        return objects;
     }
-    private void SetSpatialObjectRenderers()
+
+    private void SetColliderStatus(GameObject[][] objects, int index, bool state)
     {
-        SpatialObjectRenderers = new Renderer[SpaceObjectTags.Length][];
-        for (int i = 0; i < SpaceObjectTags.Length; i++)
+        if (objects != null)
         {
-            SpatialObjectRenderers[i] = new Renderer[SpatialObjects[i].Length];
-            for (int j = 0; j < SpatialObjects[i].Length; j++)
+            colliders = new Collider[objects[index].Length];
+            for (int i = 0; i < objects[index].Length; i++)
             {
-                SpatialObjectRenderers[i][j] = SpatialObjects[i][j].GetComponent<Renderer>();
+                colliders[i] = objects[index][i].GetComponent<Collider>();
+                colliders[i].enabled = state;
             }
         }
     }
+
+    private Renderer[][] InitRenderers(GameObject[][] objects)
+    {
+        Renderer[][] renderers = new Renderer[objects.Length][];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i] = new Renderer[objects[i].Length];
+            for (int j = 0; j < renderers[i].Length; j++)
+            {
+                renderers[i][j] = objects[i][j].GetComponent<Renderer>();
+            }
+        }
+        return renderers;
+    }
+    #endregion private methods
 }
