@@ -51,7 +51,7 @@ public class ArrowManager : MonoBehaviour
             // Debug.Log(ArrowAvatar.transform.position);
             ArrowAvatar.SetActive(true);
             SetTextStatus(true);
-            mText.text = "Please stand here and click your trigger.";
+            mText.text = "Please stand on the footprint and click your trigger.";
         } else {
             Debug.Log("Arrow Activation Failed");
         }
