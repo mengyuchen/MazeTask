@@ -9,13 +9,15 @@ public class TutorialManager : MonoBehaviour
     TrackPlayer logManager;
     InteractionManager interactionManager;
     [Header("Object Setup")]
+    [Tooltip("The arrival sphere will appear after user successfully test the controller feature")]
     [SerializeField] GameObject ArrivalSphere;
-    [SerializeField] TextMeshPro InstructionText;
     [Tooltip("Setup Message for clicking tutorial")] 
     [SerializeField] string MessageBefore = "Please Click the Bubbles with your controller upon touching them.";
     [Tooltip("Setup Message for next phase")]
     [SerializeField] string MessageAfter = "Great. Please walk to the Sphere and click it to proceed to next level.";
-
+    [Header("Reference")]
+    [Tooltip("Reference to instruction text.")]
+    [SerializeField] TextMeshPro InstructionText;
     private BubbleClick[] bubbles;
     private int activeBubbles;
     
