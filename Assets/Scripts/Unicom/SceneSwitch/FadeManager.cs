@@ -43,15 +43,17 @@ public class FadeManager : MonoBehaviour
     }
     public void FadeIn()
     {
-        //Debug.Log(fading);
+        //Debug.Log("Fade in target " + fadeColor);
         StartCoroutine(LinearFade(defaultColor, fadeColor, fadeInDuration));
     }
     public void FadeOut()
     {
+        //Debug.Log("Fade out target " + defaultColor);
         StartCoroutine(LinearFade(fadeColor, defaultColor, fadeOutDuration));
     }
     public void ResetFadeOut()
     {
+        //Debug.Log("Fade out reset");
         StartCoroutine(LinearFade(fadeColor, defaultColor, fadeOutDuration / 4));
     }
     public void QuickFade()
@@ -66,9 +68,10 @@ public class FadeManager : MonoBehaviour
     {
         while (fading)
         {
-            
+            //Debug.Log("yield fading duration " + duration);
             yield return null;
         }
+        //Debug.Log("Linear fading " + origin + " dur: " + duration);
         fading = true;
         float journey = 0f;
         while (journey <= duration)
@@ -80,6 +83,7 @@ public class FadeManager : MonoBehaviour
             yield return null;
         }
         fading = false;
+        //Debug.Log("Linear fading done" + target + " dur: " + duration);
     }
     IEnumerator CurveFade(Color origin, Color target, float duration)
     {
@@ -87,6 +91,7 @@ public class FadeManager : MonoBehaviour
         {
             yield return null;
         }
+        //Debug.Log("Curve fading " + origin);
         fading = true;
         float journey = 0f;
         while (journey <= duration)
@@ -99,5 +104,7 @@ public class FadeManager : MonoBehaviour
             yield return null;
         }
         fading = false;
+
+        //Debug.Log("Curve fading done" + target);
     }
 }

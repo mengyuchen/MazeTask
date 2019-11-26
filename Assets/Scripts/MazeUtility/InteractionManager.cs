@@ -19,9 +19,8 @@ public class InteractionManager : MonoBehaviour
     public bool ControllerConfirm = true;
 
     [Header("Debug Mode")]
-    [SerializeField] bool debug = true;
-    [Tooltip("For Debug Mode Only. For official version, this should be turned off.")] 
-    [SerializeField] bool ControllerMovement = true;
+    public bool Debug = true;
+    bool ControllerMovement = true;
     
     Player player;
 
@@ -34,6 +33,7 @@ public class InteractionManager : MonoBehaviour
     void Start()
     {
         if (player == null) player = Player.instance;
+        ControllerMovement = Debug;
     }
 
     // Update is called once per frame
@@ -57,7 +57,7 @@ public class InteractionManager : MonoBehaviour
         {
             if (PinchClicked != null) PinchClicked(false);
         }
-        if (ControllerMovement && debug)
+        if (ControllerMovement && Debug)
         {
             if (XRTK.ControllerStats.getGrip(RightHand))
             {

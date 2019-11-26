@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour {
     VisibilityManager visibilityManager;
     MazeManager mazeManager;
 	TrackPlayer logManager;
+    InteractionManager interactionManager;
 
     [Header("Input Fields")]
 	[Tooltip("Input field for participant name")]
@@ -48,6 +49,7 @@ public class UIManager : MonoBehaviour {
         if (timeManager == null) timeManager = TimeManager.instance;
         if (visibilityManager == null) visibilityManager = VisibilityManager.instance;
         if (mazeManager == null) mazeManager = MazeManager.instance;
+        if (interactionManager == null) interactionManager = InteractionManager.instance;
 
         spatialObjectSwitch = spaceManager.SpatialObjectOff;
         distanceModeSwitch = visibilityManager.DistanceMode;
@@ -136,9 +138,29 @@ public class UIManager : MonoBehaviour {
                 }
             }
             GUILayout.Space(ButtonSpacing);
+            GUILayout.Space(ButtonSpacing);
+            GUILayout.Space(ButtonSpacing);
+            GUILayout.Space(ButtonSpacing);
+
+            if (interactionManager.Debug)
+            {
+                if (GUILayout.Button("(Debug) Controller Click"))
+                {
+                    if (interactionManager.PinchClicked != null)
+                    {
+                        interactionManager.PinchClicked(true);
+                        StartCoroutine(PinchReset());
+                    }
+                }
+            }
+
             GUILayout.EndArea();
         }
         
     }
-
+    IEnumerator PinchReset()
+    {
+        yield return new WaitForSeconds(0.15f);
+        interactionManager.PinchClicked(false);
+    }
 }

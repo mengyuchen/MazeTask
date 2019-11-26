@@ -76,7 +76,7 @@ public class LevelLauncher : MonoBehaviour
 		enabled = true;
         loading = false;
         fadeManager.FadeOut();
-	}
+    }
     IEnumerator UnloadLevel(){
         enabled = false; // <-- this is the Unity Behavior enable bool
         fadeManager.FadeIn();

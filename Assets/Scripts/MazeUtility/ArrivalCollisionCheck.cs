@@ -56,7 +56,7 @@ public class ArrivalCollisionCheck : MonoBehaviour {
         if (controllerTouching && pinchClicked && !StartingObject){
             //level start confirmation is required to be able to trigger arrival
             if (triggered == false) {
-                fadeManager.QuickFade();
+                //fadeManager.QuickFade();
                 if (ArrivalPointName == "")
                 {
                     ArrivalPointName = transform.name;
@@ -82,7 +82,7 @@ public class ArrivalCollisionCheck : MonoBehaviour {
                 {
                     if (triggered == false)
                     {
-                        fadeManager.QuickFade();
+                        //fadeManager.QuickFade();
                         mazeManager.CompleteMaze(true, ArrivalPointName);
                         triggered = true; //extra safe to make sure if doesn't accidentally trigger twice
                     }
