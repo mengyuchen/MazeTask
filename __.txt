@@ -2161,3 +2161,8 @@ Participant Gender:
 Participant ID: 
 Test Date: 
 Maze Mode: testing
+Participant Name: 
+Participant Gender: 
+Participant ID: 
+Test Date: 
+Maze Mode: testing
